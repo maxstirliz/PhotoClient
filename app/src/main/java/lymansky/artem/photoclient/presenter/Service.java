@@ -1,4 +1,4 @@
-package lymansky.artem.photoclient.controller;
+package lymansky.artem.photoclient.presenter;
 
 import java.util.List;
 

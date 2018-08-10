@@ -1,4 +1,4 @@
-package lymansky.artem.photoclient.controller;
+package lymansky.artem.photoclient.presenter;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
