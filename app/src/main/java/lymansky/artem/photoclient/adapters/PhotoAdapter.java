@@ -17,7 +17,7 @@ import lymansky.artem.photoclient.model.Photo;
 
 public class PhotoAdapter extends PagedListAdapter<Photo, PhotoAdapter.PhotoViewHolder> {
 
-    protected PhotoAdapter() {
+    public PhotoAdapter() {
         super(DIFF_CALLBACK);
     }
 
@@ -51,8 +51,10 @@ public class PhotoAdapter extends PagedListAdapter<Photo, PhotoAdapter.PhotoView
         }
 
         private void bindTo(Photo photo) {
+
+            //TODO: image loading not working
             Glide.with(imageView)
-                    .load(photo.getUrls().get(0).getRaw())
+                    .load(photo.getRaw())
                     .into(imageView);
             idText.setText(photo.getId());
         }
