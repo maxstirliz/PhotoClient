@@ -4,6 +4,7 @@ import android.arch.paging.PagedListAdapter;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,9 +53,9 @@ public class PhotoAdapter extends PagedListAdapter<Photo, PhotoAdapter.PhotoView
 
         private void bindTo(Photo photo) {
 
-            //TODO: image loading not working
+            //TODO: Glide setting for image to fit the CardView
             Glide.with(imageView)
-                    .load(photo.getRaw())
+                    .load(photo.getUrls().getThumb())
                     .into(imageView);
             idText.setText(photo.getId());
         }

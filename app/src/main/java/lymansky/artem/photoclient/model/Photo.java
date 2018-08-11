@@ -20,8 +20,8 @@ public class Photo {
     private String id;
     @SerializedName("raw")
     private String raw;
-//    @SerializedName("urls")
-//    private List<Urls> urls;
+    @SerializedName("urls")
+    private Urls urls;
 //    @SerializedName("links")
 //    private List<Links> links;
 
@@ -33,10 +33,10 @@ public class Photo {
         return raw;
     }
 
-//    public List<Urls> getUrls() {
-//        return urls;
-//    }
-//
+    public Urls getUrls() {
+        return urls;
+    }
+
 //    public List<Links> getLinks() {
 //        return links;
 //    }
