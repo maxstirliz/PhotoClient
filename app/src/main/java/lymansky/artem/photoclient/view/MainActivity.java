@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSource.S
     private RecyclerView rv;
     private PhotoAdapter adapter;
     private List<Photo> photos;
-    private String query="nature";
+    private String query;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
