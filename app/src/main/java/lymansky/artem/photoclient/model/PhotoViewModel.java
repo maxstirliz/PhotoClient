@@ -6,6 +6,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PageKeyedDataSource;
 import android.arch.paging.PagedList;
 
+import lymansky.artem.photoclient.presenter.KeyHolder;
 import lymansky.artem.photoclient.presenter.PhotoDataSource;
 import lymansky.artem.photoclient.presenter.PhotoDataSourceFactory;
 
@@ -19,7 +20,7 @@ public class PhotoViewModel extends ViewModel {
 
         PagedList.Config pagedListConfig = (new PagedList.Config.Builder())
                 .setEnablePlaceholders(false)
-                .setPageSize(PhotoDataSource.PER_PAGE).build();
+                .setPageSize(KeyHolder.PER_PAGE).build();
 
         photoPagedList = (new LivePagedListBuilder(photoDataSourceFactory, pagedListConfig))
                 .build();

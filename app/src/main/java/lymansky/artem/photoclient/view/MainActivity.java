@@ -11,12 +11,21 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import java.util.List;
+
 import lymansky.artem.photoclient.R;
 import lymansky.artem.photoclient.adapters.PhotoAdapter;
 import lymansky.artem.photoclient.model.Photo;
 import lymansky.artem.photoclient.model.PhotoViewModel;
+import lymansky.artem.photoclient.presenter.Client;
+import lymansky.artem.photoclient.presenter.KeyHolder;
+import lymansky.artem.photoclient.presenter.PhotoDataSource;
+import lymansky.artem.photoclient.presenter.Service;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PhotoDataSource.SearchQueryListener {
 
     private static final int SPAN_COUNT_PORTRAY = 2;
     private static final int SPAN_COUNT_LANDSCAPE = 3;
@@ -25,11 +34,19 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rv;
     private PhotoAdapter adapter;
+    private List<Photo> photos;
+    private String query="nature";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        PhotoDataSource.setSearchQueryListener(this);
+
+        if(savedInstanceState != null) {
+            query = savedInstanceState.getString(KeyHolder.KEY_QUERY);
+        }
 
         rv = findViewById(R.id.recyclerView);
 
@@ -60,5 +77,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void setLayoutManager(int span) {
         layoutManager = new GridLayoutManager(this, span, LinearLayoutManager.VERTICAL, false);
+    }
+
+    @Override
+    public String getSearchQuery() {
+        return query;
     }
 }

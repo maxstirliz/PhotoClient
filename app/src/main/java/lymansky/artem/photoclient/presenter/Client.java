@@ -1,5 +1,8 @@
 package lymansky.artem.photoclient.presenter;
 
+import java.util.List;
+
+import lymansky.artem.photoclient.model.Photo;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
