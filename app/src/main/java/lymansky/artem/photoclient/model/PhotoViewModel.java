@@ -1,5 +1,6 @@
 package lymansky.artem.photoclient.model;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 import android.arch.paging.LivePagedListBuilder;
@@ -11,12 +12,23 @@ import lymansky.artem.photoclient.presenter.PhotoDataSource;
 import lymansky.artem.photoclient.presenter.PhotoDataSourceFactory;
 
 public class PhotoViewModel extends ViewModel {
-    public LiveData<PagedList<Photo>> photoPagedList;
-    public LiveData<PageKeyedDataSource<Integer, Photo>> liveDataSource;
+    private LiveData<PagedList<Photo>> photoPagedList;
 
     public PhotoViewModel() {
+        createLiveData();
+    }
+
+    public LiveData<PagedList<Photo>> getPhotoPagedList() {
+        return photoPagedList;
+    }
+
+    public void updateData(LifecycleOwner lifecycleOwner) {
+        photoPagedList.removeObservers(lifecycleOwner);
+        photoPagedList = createLiveData();
+    }
+
+    private LiveData<PagedList<Photo>> createLiveData() {
         PhotoDataSourceFactory photoDataSourceFactory = new PhotoDataSourceFactory();
-        liveDataSource = photoDataSourceFactory.getPhotoLiveDataSource();
 
         PagedList.Config pagedListConfig = (new PagedList.Config.Builder())
                 .setEnablePlaceholders(false)
@@ -24,5 +36,7 @@ public class PhotoViewModel extends ViewModel {
 
         photoPagedList = (new LivePagedListBuilder(photoDataSourceFactory, pagedListConfig))
                 .build();
+
+        return photoPagedList;
     }
 }
