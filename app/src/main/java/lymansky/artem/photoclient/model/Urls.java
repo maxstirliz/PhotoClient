@@ -5,17 +5,17 @@ import com.google.gson.annotations.SerializedName;
 public class Urls {
 
     public Urls(String raw, String thumb) {
-        this.raw = raw;
+        this.regular = raw;
         this.thumb = thumb;
     }
 
-    @SerializedName("raw")
-    private String raw;
+    @SerializedName("regular")
+    private String regular;
     @SerializedName("thumb")
     private String thumb;
 
-    public String getRaw() {
-        return raw;
+    public String getRegular() {
+        return regular;
     }
 
     public String getThumb() {

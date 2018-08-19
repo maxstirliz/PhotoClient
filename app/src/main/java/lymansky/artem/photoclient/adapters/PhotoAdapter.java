@@ -1,10 +1,10 @@
 package lymansky.artem.photoclient.adapters;
 
 import android.arch.paging.PagedListAdapter;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +12,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import lymansky.artem.photoclient.R;
 import lymansky.artem.photoclient.model.Photo;
+import lymansky.artem.photoclient.presenter.KeyHolder;
+import lymansky.artem.photoclient.view.PhotoViewActivity;
 
 public class PhotoAdapter extends PagedListAdapter<Photo, PhotoAdapter.PhotoViewHolder> {
 
@@ -35,29 +38,39 @@ public class PhotoAdapter extends PagedListAdapter<Photo, PhotoAdapter.PhotoView
     @Override
     public void onBindViewHolder(@NonNull PhotoViewHolder photoViewHolder, int i) {
         Photo photo = getItem(i);
-        if(photo != null) {
+        if (photo != null) {
             photoViewHolder.bindTo(photo);
         }
     }
 
-    public class PhotoViewHolder extends RecyclerView.ViewHolder {
+    public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ImageView imageView;
         TextView idText;
+        Photo boundPhoto;
 
         private PhotoViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageView);
             idText = itemView.findViewById(R.id.idText);
+            imageView.setOnClickListener(this);
         }
 
         private void bindTo(Photo photo) {
-
-            //TODO: Glide setting for image to fit the CardView
+            boundPhoto = photo;
             Glide.with(imageView)
                     .load(photo.getUrls().getThumb())
+                    .apply(RequestOptions.centerCropTransform())
                     .into(imageView);
             idText.setText(photo.getId());
+        }
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(view.getContext(), PhotoViewActivity.class);
+            intent.putExtra(KeyHolder.KEY_PIC_VIEW_LINK, boundPhoto.getUrls().getRegular());
+            intent.putExtra(KeyHolder.KEY_PIC_DOWNLOAD_LINK, boundPhoto.getLinks().getDownload());
+            view.getContext().startActivity(intent);
         }
     }
 
