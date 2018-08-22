@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSource.S
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.options_menu, menu);
+        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
         MenuItem searchItem = menu.findItem(R.id.search);
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setFocusable(false);

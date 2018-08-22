@@ -70,6 +70,7 @@ public class PhotoAdapter extends PagedListAdapter<Photo, PhotoAdapter.PhotoView
             Intent intent = new Intent(view.getContext(), PhotoViewActivity.class);
             intent.putExtra(KeyHolder.KEY_PIC_VIEW_LINK, boundPhoto.getUrls().getRegular());
             intent.putExtra(KeyHolder.KEY_PIC_DOWNLOAD_LINK, boundPhoto.getLinks().getDownload());
+            intent.putExtra(KeyHolder.KEY_PIC_ID, boundPhoto.getId());
             view.getContext().startActivity(intent);
         }
     }
