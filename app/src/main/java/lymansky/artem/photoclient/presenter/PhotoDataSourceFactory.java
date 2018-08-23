@@ -10,10 +10,15 @@ import lymansky.artem.photoclient.model.Photo;
 public class PhotoDataSourceFactory extends DataSource.Factory {
 
     private MutableLiveData<PageKeyedDataSource<Integer, Photo>> photoLiveDataSource = new MutableLiveData<>();
+    private PageKeyedDataSource photoDataSource;
+
+    public PhotoDataSourceFactory(PageKeyedDataSource photoDataSource) {
+        this.photoDataSource = photoDataSource;
+    }
 
     @Override
     public DataSource<Integer, Photo> create() {
-        PhotoDataSource photoDataSource = new PhotoDataSource();
+//        photoDataSource = new PhotoDataSource();
         photoLiveDataSource.postValue(photoDataSource);
         return photoDataSource;
     }

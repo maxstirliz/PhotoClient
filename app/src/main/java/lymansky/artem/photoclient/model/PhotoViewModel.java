@@ -15,20 +15,24 @@ public class PhotoViewModel extends ViewModel {
     private LiveData<PagedList<Photo>> photoPagedList;
 
     public PhotoViewModel() {
-        createLiveData();
+        createLiveData(new PhotoDataSource());
+    }
+
+    public PhotoViewModel(PageKeyedDataSource dataSource) {
+        createLiveData(dataSource);
     }
 
     public LiveData<PagedList<Photo>> getPhotoPagedList() {
         return photoPagedList;
     }
 
-    public void updateData(LifecycleOwner lifecycleOwner) {
+    public void updateData(LifecycleOwner lifecycleOwner, PageKeyedDataSource dataSource) {
         photoPagedList.removeObservers(lifecycleOwner);
-        photoPagedList = createLiveData();
+        photoPagedList = createLiveData(dataSource);
     }
 
-    private LiveData<PagedList<Photo>> createLiveData() {
-        PhotoDataSourceFactory photoDataSourceFactory = new PhotoDataSourceFactory();
+    private LiveData<PagedList<Photo>> createLiveData(PageKeyedDataSource dataSource) {
+        PhotoDataSourceFactory photoDataSourceFactory = new PhotoDataSourceFactory(dataSource);
 
         PagedList.Config pagedListConfig = (new PagedList.Config.Builder())
                 .setEnablePlaceholders(false)

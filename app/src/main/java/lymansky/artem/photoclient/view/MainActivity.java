@@ -16,11 +16,13 @@ import android.view.MenuItem;
 
 import lymansky.artem.photoclient.R;
 import lymansky.artem.photoclient.adapters.PhotoAdapter;
+import lymansky.artem.photoclient.model.Filter;
 import lymansky.artem.photoclient.model.Photo;
 import lymansky.artem.photoclient.model.PhotoViewModel;
 import lymansky.artem.photoclient.presenter.PhotoDataSource;
+import lymansky.artem.photoclient.presenter.PhotoDataSourceFiltered;
 
-public class MainActivity extends AppCompatActivity implements PhotoDataSource.SearchQueryListener {
+public class MainActivity extends AppCompatActivity implements PhotoDataSourceFiltered.FilterListener {
 
     private static final int SPAN_COUNT_PORTRAY = 2;
     private static final int SPAN_COUNT_LANDSCAPE = 3;
@@ -28,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSource.S
     private GridLayoutManager layoutManager;
     private RecyclerView rv;
     private PhotoAdapter adapter;
-    private String query;
+    private Filter filter;
     private PhotoViewModel photoViewModel;
 
     @Override
@@ -36,10 +38,9 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSource.S
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        PhotoDataSource.setSearchQueryListener(this);
-
         adapter = new PhotoAdapter();
         rv = findViewById(R.id.recyclerView);
+        filter = new Filter();
 
         Configuration configuration = getResources().getConfiguration();
         if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -78,8 +79,9 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSource.S
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
-                query = s;
-                photoViewModel.updateData(MainActivity.this);
+                filter.setSearchQuery(s);
+                PhotoDataSourceFiltered.setSearchQueryListener(MainActivity.this);
+                photoViewModel.updateData(MainActivity.this, new PhotoDataSourceFiltered());
                 photoViewModel.getPhotoPagedList().observe(MainActivity.this, new Observer<PagedList<Photo>>() {
                     @Override
                     public void onChanged(@Nullable PagedList<Photo> photos) {
@@ -99,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSource.S
     }
 
     @Override
-    public String getSearchQuery() {
-        return query;
+    public Filter getFilter() {
+        return filter;
     }
 }
