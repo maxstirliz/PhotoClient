@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import java.util.List;
 
 import lymansky.artem.photoclient.model.Filter;
+import lymansky.artem.photoclient.model.KeyHolder;
 import lymansky.artem.photoclient.model.Photo;
 import lymansky.artem.photoclient.model.SearchResults;
 import retrofit2.Call;

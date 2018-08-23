@@ -8,19 +8,15 @@ public class Photo {
 
     @SerializedName("id")
     private String id;
-    @SerializedName("raw")
-    private String raw;
     @SerializedName("urls")
     private Urls urls;
     @SerializedName("links")
     private Links links;
+    @SerializedName("user")
+    private User user;
 
     public String getId() {
         return id;
-    }
-
-    public String getRaw() {
-        return raw;
     }
 
     public Urls getUrls() {
@@ -29,5 +25,9 @@ public class Photo {
 
     public Links getLinks() {
         return links;
+    }
+
+    public User getUser() {
+        return user;
     }
 }

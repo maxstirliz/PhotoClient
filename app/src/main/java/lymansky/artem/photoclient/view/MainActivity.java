@@ -15,11 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import lymansky.artem.photoclient.R;
-import lymansky.artem.photoclient.adapters.PhotoAdapter;
+import lymansky.artem.photoclient.presenter.PhotoAdapter;
 import lymansky.artem.photoclient.model.Filter;
 import lymansky.artem.photoclient.model.Photo;
 import lymansky.artem.photoclient.model.PhotoViewModel;
-import lymansky.artem.photoclient.presenter.PhotoDataSource;
 import lymansky.artem.photoclient.presenter.PhotoDataSourceFiltered;
 
 public class MainActivity extends AppCompatActivity implements PhotoDataSourceFiltered.FilterListener {
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
         MenuItem searchItem = menu.findItem(R.id.search);
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setFocusable(false);
-        searchView.setQueryHint("Search here!");
+        searchView.setQueryHint(getString(R.string.search_here));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {

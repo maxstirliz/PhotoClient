@@ -7,7 +7,6 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PageKeyedDataSource;
 import android.arch.paging.PagedList;
 
-import lymansky.artem.photoclient.presenter.KeyHolder;
 import lymansky.artem.photoclient.presenter.PhotoDataSource;
 import lymansky.artem.photoclient.presenter.PhotoDataSourceFactory;
 

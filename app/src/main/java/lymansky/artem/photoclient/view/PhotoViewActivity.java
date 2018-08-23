@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,15 +27,17 @@ import java.io.OutputStream;
 import java.net.URL;
 
 import lymansky.artem.photoclient.R;
-import lymansky.artem.photoclient.presenter.FileDownloadClient;
-import lymansky.artem.photoclient.presenter.KeyHolder;
+import lymansky.artem.photoclient.presenter.Client;
+import lymansky.artem.photoclient.model.KeyHolder;
+import lymansky.artem.photoclient.presenter.Service;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+
+    private static final String JPG_EXTENSION = ".jpg";
 
     private PhotoView imageView;
     private String imageUrl;
@@ -57,7 +58,6 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
         popUp = findViewById(R.id.popUp);
         imageUrl = intent.getStringExtra(KeyHolder.KEY_PIC_VIEW_LINK);
         downloadUrl = intent.getStringExtra(KeyHolder.KEY_PIC_DOWNLOAD_LINK);
-        Log.e("PhotoViewActivity", "download link --------------------------> " + downloadUrl);
         id = intent.getStringExtra(KeyHolder.KEY_PIC_ID);
 
         new GetImageFromUrl(imageView).execute(imageUrl);
@@ -98,11 +98,8 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
     }
 
     private void downloadFile(String link) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://unsplash.com")
-                .build();
-        FileDownloadClient client = retrofit.create(FileDownloadClient.class);
-        Call<ResponseBody> call = client.downloadFile(link);
+
+        Call<ResponseBody> call = Client.getDownloadService(Service.class).downloadFile(link);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -122,7 +119,7 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
             File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
                     + File.separator
                     + id
-                    + ".jpg"
+                    + JPG_EXTENSION
             );
             InputStream in = null;
             OutputStream out = null;
@@ -160,7 +157,7 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
 
         PhotoView imageView;
 
-        public GetImageFromUrl(PhotoView image) {
+        GetImageFromUrl(PhotoView image) {
             this.imageView = image;
         }
 

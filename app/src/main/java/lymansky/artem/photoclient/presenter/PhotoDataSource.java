@@ -2,12 +2,11 @@ package lymansky.artem.photoclient.presenter;
 
 import android.arch.paging.PageKeyedDataSource;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.util.List;
 
+import lymansky.artem.photoclient.model.KeyHolder;
 import lymansky.artem.photoclient.model.Photo;
-import lymansky.artem.photoclient.model.SearchResults;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

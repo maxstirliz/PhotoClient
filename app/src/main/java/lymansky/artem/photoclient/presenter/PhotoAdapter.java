@@ -1,4 +1,4 @@
-package lymansky.artem.photoclient.adapters;
+package lymansky.artem.photoclient.presenter;
 
 import android.arch.paging.PagedListAdapter;
 import android.content.Intent;
@@ -12,14 +12,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 
 import lymansky.artem.photoclient.R;
 import lymansky.artem.photoclient.model.Photo;
-import lymansky.artem.photoclient.presenter.KeyHolder;
+import lymansky.artem.photoclient.model.KeyHolder;
 import lymansky.artem.photoclient.view.PhotoViewActivity;
 
 public class PhotoAdapter extends PagedListAdapter<Photo, PhotoAdapter.PhotoViewHolder> {
+
+    private static final int TRANSITION_DURATION = 1000;
 
     public PhotoAdapter() {
         super(DIFF_CALLBACK);
@@ -47,12 +50,14 @@ public class PhotoAdapter extends PagedListAdapter<Photo, PhotoAdapter.PhotoView
 
         ImageView imageView;
         TextView idText;
+        TextView username;
         Photo boundPhoto;
 
         private PhotoViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageView);
-            idText = itemView.findViewById(R.id.idText);
+            idText = itemView.findViewById(R.id.byText);
+            username = itemView.findViewById(R.id.idText);
             imageView.setOnClickListener(this);
         }
 
@@ -61,8 +66,9 @@ public class PhotoAdapter extends PagedListAdapter<Photo, PhotoAdapter.PhotoView
             Glide.with(imageView)
                     .load(photo.getUrls().getThumb())
                     .apply(RequestOptions.centerCropTransform())
+                    .transition(DrawableTransitionOptions.withCrossFade(TRANSITION_DURATION))
                     .into(imageView);
-            idText.setText(photo.getId());
+            username.setText(photo.getUser().getUsername());
         }
 
         @Override
