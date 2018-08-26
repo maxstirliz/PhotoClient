@@ -3,6 +3,4 @@
 
     <string name="by">by </string>
     <string name="search_here">Search here</string>
-    <string name="no_results">No results!</string>
-    <string name="no_connection">There is no Internet connection on your device!\n\nPlease, check if mobile data and/or wi-fi is on, and TAP this message TO RELOAD.</string>
 </resources>
