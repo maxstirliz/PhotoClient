@@ -43,9 +43,9 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
 
         Configuration configuration = getResources().getConfiguration();
         if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            setLayoutManager(SPAN_COUNT_PORTRAY);
+            setupLayoutManager(SPAN_COUNT_PORTRAY);
         } else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            setLayoutManager(SPAN_COUNT_LANDSCAPE);
+            setupLayoutManager(SPAN_COUNT_LANDSCAPE);
         }
 
         rv.setLayoutManager(layoutManager);
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
         rv.setAdapter(adapter);
     }
 
-    private void setLayoutManager(int span) {
+    private void setupLayoutManager(int span) {
         layoutManager = new GridLayoutManager(this, span, LinearLayoutManager.VERTICAL, false);
     }
 
