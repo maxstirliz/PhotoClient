@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
         rv = findViewById(R.id.recyclerView);
         filter = new Filter();
 
+        //Configuration check
         Configuration configuration = getResources().getConfiguration();
         if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             setupLayoutManager(SPAN_COUNT_PORTRAY);
@@ -48,12 +49,8 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
             setupLayoutManager(SPAN_COUNT_LANDSCAPE);
         }
 
-        rv.setLayoutManager(layoutManager);
-        rv.setHasFixedSize(true);
 
         photoViewModel = ViewModelProviders.of(this).get(PhotoViewModel.class);
-
-
         photoViewModel.getPhotoPagedList().observe(this, new Observer<PagedList<Photo>>() {
             @Override
             public void onChanged(@Nullable PagedList<Photo> photos) {
@@ -61,11 +58,9 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
             }
         });
 
+        rv.setLayoutManager(layoutManager);
+        rv.setHasFixedSize(true);
         rv.setAdapter(adapter);
-    }
-
-    private void setupLayoutManager(int span) {
-        layoutManager = new GridLayoutManager(this, span, LinearLayoutManager.VERTICAL, false);
     }
 
     @Override
@@ -102,5 +97,10 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
     @Override
     public Filter getFilter() {
         return filter;
+    }
+
+    //Custom methods
+    private void setupLayoutManager(int span) {
+        layoutManager = new GridLayoutManager(this, span, LinearLayoutManager.VERTICAL, false);
     }
 }

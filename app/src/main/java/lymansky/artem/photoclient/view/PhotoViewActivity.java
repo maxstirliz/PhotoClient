@@ -86,6 +86,7 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
         }
     }
 
+    //Custom methods
     private void showMenu(View v) {
         PopupMenu popupMenu = new PopupMenu(this, v);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
