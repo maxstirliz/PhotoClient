@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
         noInternetImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                setMessagesToGone();
                 PageKeyedDataSource<Integer, Photo> dataSource;
                 if(filter.getSearchQuery() == null || filter.getSearchQuery().isEmpty()) {
                     dataSource = new PhotoDataSource();
