@@ -3,4 +3,7 @@
 
     <string name="by">by </string>
     <string name="search_here">Search here</string>
+
+    <string name="no_internet">Problems with Internet connection.\nPress the image to refresh.</string>
+    <string name="empty_result">No results found.</string>
 </resources>

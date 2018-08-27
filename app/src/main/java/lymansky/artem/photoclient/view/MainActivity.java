@@ -2,6 +2,7 @@ package lymansky.artem.photoclient.view;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.arch.paging.PageKeyedDataSource;
 import android.arch.paging.PagedList;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -13,15 +14,20 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import lymansky.artem.photoclient.R;
+import lymansky.artem.photoclient.presenter.DataSourceCallback;
 import lymansky.artem.photoclient.presenter.PhotoAdapter;
 import lymansky.artem.photoclient.model.Filter;
 import lymansky.artem.photoclient.model.Photo;
 import lymansky.artem.photoclient.model.PhotoViewModel;
+import lymansky.artem.photoclient.presenter.PhotoDataSource;
 import lymansky.artem.photoclient.presenter.PhotoDataSourceFiltered;
 
-public class MainActivity extends AppCompatActivity implements PhotoDataSourceFiltered.FilterListener {
+public class MainActivity extends AppCompatActivity implements PhotoDataSourceFiltered.FilterListener, DataSourceCallback {
 
     private static final int SPAN_COUNT_PORTRAY = 2;
     private static final int SPAN_COUNT_LANDSCAPE = 3;
@@ -31,11 +37,22 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
     private PhotoAdapter adapter;
     private Filter filter;
     private PhotoViewModel photoViewModel;
+    private LinearLayout noInternetMessage;
+    private LinearLayout emptyResultsMessage;
+    private ImageView noInternetImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        PhotoDataSource.setDataSourceCallback(this);
+        PhotoDataSourceFiltered.setDataSourceCallback(this);
+
+        noInternetMessage = findViewById(R.id.noInternetMessage);
+        emptyResultsMessage = findViewById(R.id.emptyResultsMessage);
+        noInternetImage = findViewById(R.id.no_internet_image);
+        setMessagesToGone();
 
         adapter = new PhotoAdapter();
         rv = findViewById(R.id.recyclerView);
@@ -61,6 +78,27 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
         rv.setAdapter(adapter);
+
+        noInternetImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PageKeyedDataSource<Integer, Photo> dataSource;
+                if(filter.getSearchQuery() == null || filter.getSearchQuery().isEmpty()) {
+                    dataSource = new PhotoDataSource();
+                } else {
+                    PhotoDataSourceFiltered.setFilterListener(MainActivity.this);
+                    dataSource = new PhotoDataSourceFiltered();
+                }
+                photoViewModel.updateData(MainActivity.this, dataSource);
+                photoViewModel.getPhotoPagedList().observe(MainActivity.this, new Observer<PagedList<Photo>>() {
+                    @Override
+                    public void onChanged(@Nullable PagedList<Photo> photos) {
+                        setMessagesToGone();
+                        adapter.submitList(photos);
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -74,7 +112,8 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
             @Override
             public boolean onQueryTextSubmit(String s) {
                 filter.setSearchQuery(s);
-                PhotoDataSourceFiltered.setSearchQueryListener(MainActivity.this);
+                setMessagesToGone();
+                PhotoDataSourceFiltered.setFilterListener(MainActivity.this);
                 photoViewModel.updateData(MainActivity.this, new PhotoDataSourceFiltered());
                 photoViewModel.getPhotoPagedList().observe(MainActivity.this, new Observer<PagedList<Photo>>() {
                     @Override
@@ -99,8 +138,27 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
         return filter;
     }
 
+    //DataSourceCallback methods
+    @Override
+    public void onConnectionFailure() {
+        emptyResultsMessage.setVisibility(View.GONE);
+        noInternetMessage.setVisibility(View.VISIBLE);
+
+    }
+
+    @Override
+    public void onEmptyResponse() {
+        noInternetMessage.setVisibility(View.GONE);
+        emptyResultsMessage.setVisibility(View.VISIBLE);
+    }
+
     //Custom methods
     private void setupLayoutManager(int span) {
         layoutManager = new GridLayoutManager(this, span, LinearLayoutManager.VERTICAL, false);
+    }
+
+    private void setMessagesToGone() {
+        noInternetMessage.setVisibility(View.GONE);
+        emptyResultsMessage.setVisibility(View.GONE);
     }
 }

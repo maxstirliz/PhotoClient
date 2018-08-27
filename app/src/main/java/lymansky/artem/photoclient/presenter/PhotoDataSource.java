@@ -13,6 +13,12 @@ import retrofit2.Response;
 
 public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
 
+    private static DataSourceCallback dataSourceCallback;
+
+    public static void setDataSourceCallback(DataSourceCallback callback) {
+        dataSourceCallback = callback;
+    }
+
     @Override
     public void loadInitial(@NonNull LoadInitialParams<Integer> params, @NonNull final LoadInitialCallback<Integer, Photo> callback) {
 
@@ -23,12 +29,15 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
                     public void onResponse(Call<List<Photo>> call, Response<List<Photo>> response) {
                         if (response.body() != null) {
                             callback.onResult(response.body(), null, KeyHolder.PAGE + 1);
+                            if(response.body().size() < 1) dataSourceCallback.onEmptyResponse();
+                        } else {
+                            dataSourceCallback.onEmptyResponse();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<Photo>> call, Throwable t) {
-
+                        dataSourceCallback.onConnectionFailure();
                     }
                 });
 
@@ -45,12 +54,15 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
                         Integer adjacentKey = (params.key > 1) ? params.key - 1 : null;
                         if (response.body() != null) {
                             callback.onResult(response.body(), adjacentKey);
+                            if(response.body().size() < 1) dataSourceCallback.onEmptyResponse();
+                        } else {
+                            dataSourceCallback.onEmptyResponse();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<Photo>> call, Throwable t) {
-
+                        dataSourceCallback.onConnectionFailure();
                     }
                 });
 
@@ -67,12 +79,15 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
                         if (response.body() != null) {
                             Integer key = params.key + 1;
                             callback.onResult(response.body(), key);
+                            if(response.body().size() < 1) dataSourceCallback.onEmptyResponse();
+                        } else {
+                            dataSourceCallback.onEmptyResponse();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<Photo>> call, Throwable t) {
-
+                        dataSourceCallback.onConnectionFailure();
                     }
                 });
     }

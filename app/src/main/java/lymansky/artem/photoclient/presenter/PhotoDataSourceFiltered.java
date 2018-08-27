@@ -19,10 +19,16 @@ public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo>
         Filter getFilter();
     }
 
+    //Callback fields and setters
     private static FilterListener queryListener;
+    private static DataSourceCallback dataSourceCallback;
 
-    public static void setSearchQueryListener(FilterListener listener) {
+    public static void setFilterListener(FilterListener listener) {
         queryListener = listener;
+    }
+
+    public static void setDataSourceCallback(DataSourceCallback callback) {
+        dataSourceCallback = callback;
     }
 
     @Override
@@ -35,12 +41,15 @@ public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo>
                         if (response.body().getPhotos() != null) {
                             List<Photo> photos = response.body().getPhotos();
                             callback.onResult(photos, null, KeyHolder.PAGE + 1);
+                            if(photos.size() < 1) dataSourceCallback.onEmptyResponse();
+                        } else {
+                            dataSourceCallback.onEmptyResponse();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<SearchResults> call, Throwable t) {
-
+                        dataSourceCallback.onConnectionFailure();
                     }
                 });
     }
@@ -56,12 +65,15 @@ public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo>
                         if (response.body() != null) {
                             List<Photo> photos = response.body().getPhotos();
                             callback.onResult(photos, adjacentKey);
+                            if(photos.size() < 1) dataSourceCallback.onEmptyResponse();
+                        } else {
+                            dataSourceCallback.onEmptyResponse();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<SearchResults> call, Throwable t) {
-
+                        dataSourceCallback.onConnectionFailure();
                     }
                 });
     }
@@ -77,12 +89,15 @@ public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo>
                             List<Photo> photos = response.body().getPhotos();
                             Integer key = params.key + 1;
                             callback.onResult(photos, key);
+                            if(photos.size() < 1) dataSourceCallback.onEmptyResponse();
+                        } else {
+                            dataSourceCallback.onEmptyResponse();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<SearchResults> call, Throwable t) {
-
+                        dataSourceCallback.onConnectionFailure();
                     }
                 });
     }
