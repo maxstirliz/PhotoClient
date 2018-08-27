@@ -54,9 +54,6 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
                         Integer adjacentKey = (params.key > 1) ? params.key - 1 : null;
                         if (response.body() != null) {
                             callback.onResult(response.body(), adjacentKey);
-                            if(response.body().size() < 1) dataSourceCallback.onEmptyResponse();
-                        } else {
-                            dataSourceCallback.onEmptyResponse();
                         }
                     }
 
@@ -79,9 +76,6 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
                         if (response.body() != null) {
                             Integer key = params.key + 1;
                             callback.onResult(response.body(), key);
-                            if(response.body().size() < 1) dataSourceCallback.onEmptyResponse();
-                        } else {
-                            dataSourceCallback.onEmptyResponse();
                         }
                     }
 
