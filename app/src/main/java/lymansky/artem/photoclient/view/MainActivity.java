@@ -27,7 +27,7 @@ import lymansky.artem.photoclient.model.PhotoViewModel;
 import lymansky.artem.photoclient.presenter.PhotoDataSource;
 import lymansky.artem.photoclient.presenter.PhotoDataSourceFiltered;
 
-public class MainActivity extends AppCompatActivity implements PhotoDataSourceFiltered.FilterListener, DataSourceCallback {
+public class MainActivity extends AppCompatActivity implements DataSourceCallback {
 
     private static final int SPAN_COUNT_PORTRAY = 2;
     private static final int SPAN_COUNT_LANDSCAPE = 3;
@@ -56,7 +56,13 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
 
         adapter = new PhotoAdapter();
         rv = findViewById(R.id.recyclerView);
-        filter = new Filter();
+
+        if(PhotoViewModel.getFilter() == null) {
+            filter = new Filter();
+            PhotoViewModel.setFilter(filter);
+        } else {
+            filter = PhotoViewModel.getFilter();
+        }
 
         //Configuration check
         Configuration configuration = getResources().getConfiguration();
@@ -83,14 +89,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
             @Override
             public void onClick(View view) {
                 setMessagesToGone();
-                PageKeyedDataSource<Integer, Photo> dataSource;
-                if(filter.getSearchQuery() == null || filter.getSearchQuery().isEmpty()) {
-                    dataSource = new PhotoDataSource();
-                } else {
-                    PhotoDataSourceFiltered.setFilterListener(MainActivity.this);
-                    dataSource = new PhotoDataSourceFiltered();
-                }
-                photoViewModel.updateData(MainActivity.this, dataSource);
+                photoViewModel.updateData(MainActivity.this, filter);
                 photoViewModel.getPhotoPagedList().observe(MainActivity.this, new Observer<PagedList<Photo>>() {
                     @Override
                     public void onChanged(@Nullable PagedList<Photo> photos) {
@@ -114,8 +113,7 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
             public boolean onQueryTextSubmit(String s) {
                 filter.setSearchQuery(s);
                 setMessagesToGone();
-                PhotoDataSourceFiltered.setFilterListener(MainActivity.this);
-                photoViewModel.updateData(MainActivity.this, new PhotoDataSourceFiltered());
+                photoViewModel.updateData(MainActivity.this, filter);
                 photoViewModel.getPhotoPagedList().observe(MainActivity.this, new Observer<PagedList<Photo>>() {
                     @Override
                     public void onChanged(@Nullable PagedList<Photo> photos) {
@@ -132,11 +130,6 @@ public class MainActivity extends AppCompatActivity implements PhotoDataSourceFi
         });
 
         return true;
-    }
-
-    @Override
-    public Filter getFilter() {
-        return filter;
     }
 
     //DataSourceCallback methods

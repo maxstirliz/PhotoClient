@@ -15,41 +15,36 @@ import retrofit2.Response;
 
 public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo> {
 
-    public interface FilterListener {
-        Filter getFilter();
+    private Filter mFilter;
+
+    public PhotoDataSourceFiltered(Filter filter) {
+        this.mFilter = filter;
     }
 
     //Callback fields and setters
-    private static FilterListener filterListener;
-    private static DataSourceCallback dataSourceCallback;
-
-    public static void setFilterListener(FilterListener listener) {
-        filterListener = listener;
-    }
+    private static DataSourceCallback sDataSourceCallback;
 
     public static void setDataSourceCallback(DataSourceCallback callback) {
-        dataSourceCallback = callback;
+        sDataSourceCallback = callback;
     }
 
     @Override
     public void loadInitial(@NonNull LoadInitialParams<Integer> params, @NonNull final LoadInitialCallback<Integer, Photo> callback) {
         Client.getService(Service.class)
-                .getSearchResults(KeyHolder.CLIENT_ID, filterListener.getFilter().getSearchQuery(), KeyHolder.PAGE, KeyHolder.PER_PAGE)
+                .getSearchResults(KeyHolder.CLIENT_ID, mFilter.getSearchQuery(), KeyHolder.PAGE, KeyHolder.PER_PAGE)
                 .enqueue(new Callback<SearchResults>() {
                     @Override
                     public void onResponse(Call<SearchResults> call, Response<SearchResults> response) {
                         if (response.body().getPhotos() != null) {
                             List<Photo> photos = response.body().getPhotos();
                             callback.onResult(photos, null, KeyHolder.PAGE + 1);
-                            if (photos.size() < 1) dataSourceCallback.onEmptyResponse();
-                        } else {
-                            dataSourceCallback.onEmptyResponse();
+                            if (photos.size() < 1) sDataSourceCallback.onEmptyResponse();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<SearchResults> call, Throwable t) {
-                        dataSourceCallback.onConnectionFailure();
+                        sDataSourceCallback.onConnectionFailure();
                     }
                 });
     }
@@ -57,7 +52,7 @@ public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo>
     @Override
     public void loadBefore(@NonNull final LoadParams<Integer> params, @NonNull final LoadCallback<Integer, Photo> callback) {
         Client.getService(Service.class)
-                .getSearchResults(KeyHolder.CLIENT_ID, filterListener.getFilter().getSearchQuery(), params.key, KeyHolder.PER_PAGE)
+                .getSearchResults(KeyHolder.CLIENT_ID, mFilter.getSearchQuery(), params.key, KeyHolder.PER_PAGE)
                 .enqueue(new Callback<SearchResults>() {
                     @Override
                     public void onResponse(Call<SearchResults> call, Response<SearchResults> response) {
@@ -70,7 +65,7 @@ public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo>
 
                     @Override
                     public void onFailure(Call<SearchResults> call, Throwable t) {
-                        dataSourceCallback.onConnectionFailure();
+                        sDataSourceCallback.onConnectionFailure();
                     }
                 });
     }
@@ -78,7 +73,7 @@ public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo>
     @Override
     public void loadAfter(@NonNull final LoadParams<Integer> params, @NonNull final LoadCallback<Integer, Photo> callback) {
         Client.getService(Service.class)
-                .getSearchResults(KeyHolder.CLIENT_ID, filterListener.getFilter().getSearchQuery(), params.key, KeyHolder.PER_PAGE)
+                .getSearchResults(KeyHolder.CLIENT_ID, mFilter.getSearchQuery(), params.key, KeyHolder.PER_PAGE)
                 .enqueue(new Callback<SearchResults>() {
                     @Override
                     public void onResponse(Call<SearchResults> call, Response<SearchResults> response) {
@@ -91,7 +86,7 @@ public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo>
 
                     @Override
                     public void onFailure(Call<SearchResults> call, Throwable t) {
-                        dataSourceCallback.onConnectionFailure();
+                        sDataSourceCallback.onConnectionFailure();
                     }
                 });
     }
