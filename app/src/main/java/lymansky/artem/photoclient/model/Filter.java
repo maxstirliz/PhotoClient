@@ -11,4 +11,8 @@ public class Filter {
     public String getSearchQuery() {
         return searchQuery;
     }
+
+    public boolean isNullContent() {
+        return searchQuery == null || searchQuery.equals("");
+    }
 }

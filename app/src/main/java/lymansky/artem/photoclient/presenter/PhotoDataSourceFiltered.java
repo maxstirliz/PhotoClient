@@ -16,14 +16,13 @@ import retrofit2.Response;
 public class PhotoDataSourceFiltered extends PageKeyedDataSource<Integer, Photo> {
 
     private Filter mFilter;
+    private static DataSourceCallback sDataSourceCallback;
 
     public PhotoDataSourceFiltered(Filter filter) {
         this.mFilter = filter;
     }
 
-    //Callback fields and setters
-    private static DataSourceCallback sDataSourceCallback;
-
+    //Callback setters
     public static void setDataSourceCallback(DataSourceCallback callback) {
         sDataSourceCallback = callback;
     }

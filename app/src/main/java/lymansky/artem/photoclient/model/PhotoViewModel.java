@@ -4,15 +4,13 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 import android.arch.paging.LivePagedListBuilder;
-import android.arch.paging.PageKeyedDataSource;
 import android.arch.paging.PagedList;
 
-import lymansky.artem.photoclient.presenter.PhotoDataSource;
 import lymansky.artem.photoclient.presenter.PhotoDataSourceFactory;
 
 public class PhotoViewModel extends ViewModel {
-    private LiveData<PagedList<Photo>> photoPagedList;
 
+    private LiveData<PagedList<Photo>> mPhotoPagedList;
     private static Filter sFilter;
 
     public PhotoViewModel() {
@@ -20,12 +18,12 @@ public class PhotoViewModel extends ViewModel {
     }
 
     public LiveData<PagedList<Photo>> getPhotoPagedList() {
-        return photoPagedList;
+        return mPhotoPagedList;
     }
 
     public void updateData(LifecycleOwner lifecycleOwner, Filter filter) {
-        photoPagedList.removeObservers(lifecycleOwner);
-        photoPagedList = createLiveData(filter);
+        mPhotoPagedList.removeObservers(lifecycleOwner);
+        mPhotoPagedList = createLiveData(filter);
     }
 
     public static Filter getFilter() {
@@ -44,9 +42,9 @@ public class PhotoViewModel extends ViewModel {
                 .setPageSize(KeyHolder.PER_PAGE)
                 .build();
 
-        photoPagedList = (new LivePagedListBuilder(photoDataSourceFactory, pagedListConfig))
+        mPhotoPagedList = (new LivePagedListBuilder<>(photoDataSourceFactory, pagedListConfig))
                 .build();
 
-        return photoPagedList;
+        return mPhotoPagedList;
     }
 }

@@ -13,10 +13,10 @@ import retrofit2.Response;
 
 public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
 
-    private static DataSourceCallback dataSourceCallback;
+    private static DataSourceCallback sDataSourceCallback;
 
     public static void setDataSourceCallback(DataSourceCallback callback) {
-        dataSourceCallback = callback;
+        sDataSourceCallback = callback;
     }
 
     @Override
@@ -29,15 +29,15 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
                     public void onResponse(Call<List<Photo>> call, Response<List<Photo>> response) {
                         if (response.body() != null) {
                             callback.onResult(response.body(), null, KeyHolder.PAGE + 1);
-                            if(response.body().size() < 1) dataSourceCallback.onEmptyResponse();
+                            if(response.body().size() < 1) sDataSourceCallback.onEmptyResponse();
                         } else {
-                            dataSourceCallback.onEmptyResponse();
+                            sDataSourceCallback.onEmptyResponse();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<Photo>> call, Throwable t) {
-                        dataSourceCallback.onConnectionFailure();
+                        sDataSourceCallback.onConnectionFailure();
                     }
                 });
 
@@ -59,7 +59,7 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
 
                     @Override
                     public void onFailure(Call<List<Photo>> call, Throwable t) {
-                        dataSourceCallback.onConnectionFailure();
+                        sDataSourceCallback.onConnectionFailure();
                     }
                 });
 
@@ -81,7 +81,7 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
 
                     @Override
                     public void onFailure(Call<List<Photo>> call, Throwable t) {
-                        dataSourceCallback.onConnectionFailure();
+                        sDataSourceCallback.onConnectionFailure();
                     }
                 });
     }

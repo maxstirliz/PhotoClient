@@ -1,5 +1,6 @@
 package lymansky.artem.photoclient.view;
 
+import android.app.WallpaperManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -39,11 +40,12 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
 
     private static final String JPG_EXTENSION = ".jpg";
 
-    private PhotoView imageView;
-    private String imageUrl;
-    private String downloadUrl;
-    private String id;
-    private ImageButton popUp;
+    private PhotoView mImageView;
+    private String mImageUrl;
+    private String mDownloadUrl;
+    private String mId;
+    private ImageButton mPopup;
+    private Bitmap mBitmapCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,15 +56,15 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
         setContentView(R.layout.activity_photo_view);
 
         Intent intent = getIntent();
-        imageView = findViewById(R.id.fullscreenPicture);
-        popUp = findViewById(R.id.popUp);
-        imageUrl = intent.getStringExtra(KeyHolder.KEY_PIC_VIEW_LINK);
-        downloadUrl = intent.getStringExtra(KeyHolder.KEY_PIC_DOWNLOAD_LINK);
-        id = intent.getStringExtra(KeyHolder.KEY_PIC_ID);
+        mImageView = findViewById(R.id.fullscreenPicture);
+        mPopup = findViewById(R.id.popUp);
+        mImageUrl = intent.getStringExtra(KeyHolder.KEY_PIC_VIEW_LINK);
+        mDownloadUrl = intent.getStringExtra(KeyHolder.KEY_PIC_DOWNLOAD_LINK);
+        mId = intent.getStringExtra(KeyHolder.KEY_PIC_ID);
 
-        new GetImageFromUrl(imageView).execute(imageUrl);
+        new GetImageFromUrl(mImageView).execute(mImageUrl);
 
-        popUp.setOnClickListener(new View.OnClickListener() {
+        mPopup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showMenu(view);
@@ -76,14 +78,26 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
         switch (menuItem.getItemId()) {
             case R.id.download:
                 Toast.makeText(this, "Downloading...", Toast.LENGTH_SHORT).show();
-                downloadFile(downloadUrl);
+                downloadFile(mDownloadUrl);
                 return true;
             case R.id.set_wallpaper:
-                Toast.makeText(this, "Set as wallpaper...", Toast.LENGTH_SHORT).show();
+                WallpaperManager wpManager = WallpaperManager.getInstance(getApplicationContext());
+                try {
+                    wpManager.setBitmap(mBitmapCache);
+                    Toast.makeText(this, "Wallpaper is set", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 return true;
             default:
                 return false;
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mBitmapCache = null;
     }
 
     //Custom methods
@@ -115,13 +129,44 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
         });
     }
 
+    //Check external storage on READ/WRITE
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        if(Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    public File getPublicAlbumStorageDir(String name) {
+        File file = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                name
+                );
+        if(!file.mkdirs()) {
+            Toast.makeText(this, "Directory not created", Toast.LENGTH_SHORT).show();
+        }
+        return file;
+    }
+
     private void writeToDisk(ResponseBody body) {
         try {
-            File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-                    + File.separator
-                    + id
-                    + JPG_EXTENSION
-            );
+//            File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+//                    + File.separator
+//                    + mId
+//                    + JPG_EXTENSION
+//            );
+            File path = getPublicAlbumStorageDir("recent");
+            File file = new File(path, mId + JPG_EXTENSION);
+
             InputStream in = null;
             OutputStream out = null;
             try {
@@ -172,6 +217,7 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            mBitmapCache = bitmap;
             return bitmap;
         }
 

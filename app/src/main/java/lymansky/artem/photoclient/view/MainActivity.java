@@ -2,7 +2,6 @@ package lymansky.artem.photoclient.view;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.arch.paging.PageKeyedDataSource;
 import android.arch.paging.PagedList;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -32,14 +31,14 @@ public class MainActivity extends AppCompatActivity implements DataSourceCallbac
     private static final int SPAN_COUNT_PORTRAY = 2;
     private static final int SPAN_COUNT_LANDSCAPE = 3;
 
-    private GridLayoutManager layoutManager;
-    private RecyclerView rv;
-    private PhotoAdapter adapter;
-    private Filter filter;
-    private PhotoViewModel photoViewModel;
-    private LinearLayout noInternetMessage;
-    private LinearLayout emptyResultsMessage;
-    private ImageView noInternetImage;
+    private GridLayoutManager mLayoutManager;
+    private RecyclerView mRecyclerView;
+    private PhotoAdapter mAdapter;
+    private Filter mFilter;
+    private PhotoViewModel mPhotoViewModel;
+    private LinearLayout mNoInternetMessage;
+    private LinearLayout mEmptyResultsMessage;
+    private ImageView mNoInternetImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,19 +48,19 @@ public class MainActivity extends AppCompatActivity implements DataSourceCallbac
         PhotoDataSource.setDataSourceCallback(this);
         PhotoDataSourceFiltered.setDataSourceCallback(this);
 
-        noInternetMessage = findViewById(R.id.noInternetMessage);
-        emptyResultsMessage = findViewById(R.id.emptyResultsMessage);
-        noInternetImage = findViewById(R.id.no_internet_image);
+        mNoInternetMessage = findViewById(R.id.noInternetMessage);
+        mEmptyResultsMessage = findViewById(R.id.emptyResultsMessage);
+        mNoInternetImage = findViewById(R.id.no_internet_image);
         setMessagesToGone();
 
-        adapter = new PhotoAdapter();
-        rv = findViewById(R.id.recyclerView);
+        mAdapter = new PhotoAdapter();
+        mRecyclerView = findViewById(R.id.recyclerView);
 
-        if(PhotoViewModel.getFilter() == null) {
-            filter = new Filter();
-            PhotoViewModel.setFilter(filter);
+        if (PhotoViewModel.getFilter() == null) {
+            mFilter = new Filter();
+            PhotoViewModel.setFilter(mFilter);
         } else {
-            filter = PhotoViewModel.getFilter();
+            mFilter = PhotoViewModel.getFilter();
         }
 
         //Configuration check
@@ -73,28 +72,28 @@ public class MainActivity extends AppCompatActivity implements DataSourceCallbac
         }
 
 
-        photoViewModel = ViewModelProviders.of(this).get(PhotoViewModel.class);
-        photoViewModel.getPhotoPagedList().observe(this, new Observer<PagedList<Photo>>() {
+        mPhotoViewModel = ViewModelProviders.of(this).get(PhotoViewModel.class);
+        mPhotoViewModel.getPhotoPagedList().observe(this, new Observer<PagedList<Photo>>() {
             @Override
             public void onChanged(@Nullable PagedList<Photo> photos) {
-                adapter.submitList(photos);
+                mAdapter.submitList(photos);
             }
         });
 
-        rv.setLayoutManager(layoutManager);
-        rv.setHasFixedSize(true);
-        rv.setAdapter(adapter);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setAdapter(mAdapter);
 
-        noInternetImage.setOnClickListener(new View.OnClickListener() {
+        mNoInternetImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setMessagesToGone();
-                photoViewModel.updateData(MainActivity.this, filter);
-                photoViewModel.getPhotoPagedList().observe(MainActivity.this, new Observer<PagedList<Photo>>() {
+                mPhotoViewModel.updateData(MainActivity.this, mFilter);
+                mPhotoViewModel.getPhotoPagedList().observe(MainActivity.this, new Observer<PagedList<Photo>>() {
                     @Override
                     public void onChanged(@Nullable PagedList<Photo> photos) {
                         setMessagesToGone();
-                        adapter.submitList(photos);
+                        mAdapter.submitList(photos);
                     }
                 });
             }
@@ -111,13 +110,13 @@ public class MainActivity extends AppCompatActivity implements DataSourceCallbac
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
-                filter.setSearchQuery(s);
+                mFilter.setSearchQuery(s);
                 setMessagesToGone();
-                photoViewModel.updateData(MainActivity.this, filter);
-                photoViewModel.getPhotoPagedList().observe(MainActivity.this, new Observer<PagedList<Photo>>() {
+                mPhotoViewModel.updateData(MainActivity.this, mFilter);
+                mPhotoViewModel.getPhotoPagedList().observe(MainActivity.this, new Observer<PagedList<Photo>>() {
                     @Override
                     public void onChanged(@Nullable PagedList<Photo> photos) {
-                        adapter.submitList(photos);
+                        mAdapter.submitList(photos);
                     }
                 });
                 return false;
@@ -135,24 +134,24 @@ public class MainActivity extends AppCompatActivity implements DataSourceCallbac
     //DataSourceCallback methods
     @Override
     public void onConnectionFailure() {
-        emptyResultsMessage.setVisibility(View.GONE);
-        noInternetMessage.setVisibility(View.VISIBLE);
+        mEmptyResultsMessage.setVisibility(View.GONE);
+        mNoInternetMessage.setVisibility(View.VISIBLE);
 
     }
 
     @Override
     public void onEmptyResponse() {
-        noInternetMessage.setVisibility(View.GONE);
-        emptyResultsMessage.setVisibility(View.VISIBLE);
+        mNoInternetMessage.setVisibility(View.GONE);
+        mEmptyResultsMessage.setVisibility(View.VISIBLE);
     }
 
     //Custom methods
     private void setupLayoutManager(int span) {
-        layoutManager = new GridLayoutManager(this, span, LinearLayoutManager.VERTICAL, false);
+        mLayoutManager = new GridLayoutManager(this, span, LinearLayoutManager.VERTICAL, false);
     }
 
     private void setMessagesToGone() {
-        noInternetMessage.setVisibility(View.GONE);
-        emptyResultsMessage.setVisibility(View.GONE);
+        mNoInternetMessage.setVisibility(View.GONE);
+        mEmptyResultsMessage.setVisibility(View.GONE);
     }
 }

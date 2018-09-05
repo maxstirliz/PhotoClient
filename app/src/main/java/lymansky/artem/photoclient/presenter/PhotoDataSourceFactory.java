@@ -8,15 +8,15 @@ import android.arch.paging.PageKeyedDataSource;
 import lymansky.artem.photoclient.model.Filter;
 import lymansky.artem.photoclient.model.Photo;
 
-public class PhotoDataSourceFactory extends DataSource.Factory {
+public class PhotoDataSourceFactory extends DataSource.Factory<Integer, Photo> {
 
     private MutableLiveData<PageKeyedDataSource<Integer, Photo>> photoLiveDataSource = new MutableLiveData<>();
-    private PageKeyedDataSource photoDataSource;
+    private PageKeyedDataSource<Integer, Photo> photoDataSource;
     private Filter mFilter;
 
     public PhotoDataSourceFactory(Filter filter) {
         this.mFilter = filter;
-        if(mFilter.getSearchQuery() == null || mFilter.getSearchQuery().isEmpty()) {
+        if (mFilter.isNullContent()) {
             photoDataSource = new PhotoDataSource();
         } else {
             photoDataSource = new PhotoDataSourceFiltered(mFilter);
