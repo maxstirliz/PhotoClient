@@ -4,6 +4,12 @@
     <string name="by">by </string>
     <string name="search_here">Search here</string>
 
+    <!--NOTIFICATIONS-->
     <string name="no_internet">Problems with Internet connection.\nPress the image to refresh.</string>
     <string name="empty_result">No results found.</string>
+    <string name="storage_problems">There are problems with storage.</string>
+    <string name="wallpaper_set">Wallpaper is set.</string>
+    <string name="permission_denied">Permission denied.</string>
+    <string name="need_write_permission">Write permission needed to proceed.</string>
+    <string name="downloading">"Downloading…"</string>
 </resources>

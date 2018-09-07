@@ -1,12 +1,21 @@
 package lymansky.artem.photoclient.view;
 
+import android.Manifest;
+import android.app.DownloadManager;
 import android.app.WallpaperManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.MenuInflater;
@@ -20,25 +29,17 @@ import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 
 import lymansky.artem.photoclient.R;
-import lymansky.artem.photoclient.presenter.Client;
 import lymansky.artem.photoclient.model.KeyHolder;
-import lymansky.artem.photoclient.presenter.Service;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     private static final String JPG_EXTENSION = ".jpg";
+    private static final int MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 123;
 
     private PhotoView mImageView;
     private String mImageUrl;
@@ -55,6 +56,7 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_photo_view);
 
+        //Getting Photo data
         Intent intent = getIntent();
         mImageView = findViewById(R.id.fullscreenPicture);
         mPopup = findViewById(R.id.popUp);
@@ -62,7 +64,7 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
         mDownloadUrl = intent.getStringExtra(KeyHolder.KEY_PIC_DOWNLOAD_LINK);
         mId = intent.getStringExtra(KeyHolder.KEY_PIC_ID);
 
-        new GetImageFromUrl(mImageView).execute(mImageUrl);
+        new GetImageFromUrlTask(mImageView).execute(mImageUrl);
 
         mPopup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,21 +72,24 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
                 showMenu(view);
             }
         });
-
     }
 
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.download:
-                Toast.makeText(this, "Downloading...", Toast.LENGTH_SHORT).show();
-                downloadFile(mDownloadUrl);
+                if (isExternalStorageWritable()) {
+                    checkPermission();
+                } else {
+                    Toast.makeText(this, R.string.storage_problems, Toast.LENGTH_SHORT).show();
+                }
                 return true;
             case R.id.set_wallpaper:
                 WallpaperManager wpManager = WallpaperManager.getInstance(getApplicationContext());
                 try {
+                    mBitmapCache = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
                     wpManager.setBitmap(mBitmapCache);
-                    Toast.makeText(this, "Wallpaper is set", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.wallpaper_set, Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -95,9 +100,18 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        mBitmapCache = null;
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE: {
+                if(grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    downloadFile(mImageUrl);
+                } else {
+                    Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     //Custom methods
@@ -112,24 +126,34 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
         popupMenu.show();
     }
 
-    private void downloadFile(String link) {
-
-        Call<ResponseBody> call = Client.getDownloadService(Service.class).downloadFile(link);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                writeToDisk(response.body());
-                Toast.makeText(PhotoViewActivity.this, "File downloaded", Toast.LENGTH_SHORT).show();
+    //Check permission to write on SD card
+    private void checkPermission() {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                Toast.makeText(this, R.string.need_write_permission, Toast.LENGTH_SHORT).show();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE);
             }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(PhotoViewActivity.this, "Download error", Toast.LENGTH_SHORT).show();
-            }
-        });
+        } else {
+            downloadFile(mImageUrl);
+        }
     }
 
-    //Check external storage on READ/WRITE
+    private void downloadFile(String uriString) {
+        Uri uri = Uri.parse(uriString);
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+        request.setTitle(mId + JPG_EXTENSION);
+        request.setDescription(getString(R.string.downloading));
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, mId + JPG_EXTENSION);
+        DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        downloadManager.enqueue(request);
+    }
+
+    //Check external storage on WRITE permission
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -138,72 +162,11 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
         return false;
     }
 
-    public boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        if(Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return true;
-        }
-        return false;
-    }
-
-    public File getPublicAlbumStorageDir(String name) {
-        File file = new File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                name
-                );
-        if(!file.mkdirs()) {
-            Toast.makeText(this, "Directory not created", Toast.LENGTH_SHORT).show();
-        }
-        return file;
-    }
-
-    private void writeToDisk(ResponseBody body) {
-        try {
-//            File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-//                    + File.separator
-//                    + mId
-//                    + JPG_EXTENSION
-//            );
-            File path = getPublicAlbumStorageDir("recent");
-            File file = new File(path, mId + JPG_EXTENSION);
-
-            InputStream in = null;
-            OutputStream out = null;
-            try {
-                byte[] fileReader = new byte[4096];
-                in = body.byteStream();
-                out = new FileOutputStream(file);
-
-                while (true) {
-                    int read = in.read(fileReader);
-                    if (read == -1) {
-                        break;
-                    }
-
-                    out.write(fileReader, 0, read);
-
-                }
-                out.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (in != null) {
-                    in.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private class GetImageFromUrl extends AsyncTask<String, Void, Bitmap> {
+    private class GetImageFromUrlTask extends AsyncTask<String, Void, Bitmap> {
 
         PhotoView imageView;
 
-        GetImageFromUrl(PhotoView image) {
+        GetImageFromUrlTask(PhotoView image) {
             this.imageView = image;
         }
 
@@ -217,7 +180,6 @@ public class PhotoViewActivity extends AppCompatActivity implements PopupMenu.On
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            mBitmapCache = bitmap;
             return bitmap;
         }
 
